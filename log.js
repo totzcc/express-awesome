@@ -1,11 +1,11 @@
 const log4js = require('log4js')
 log4js.configure({
     appenders: {
-        appendCosnole: {type: 'console'},
+        appendConsole: {type: 'console'},
         appendFile: { type: 'file', filename: 'logs/access.log'}
     },
     categories: {
-        default: { appenders: ['appendCosnole', 'appendFile'], level: 'all' }
+        default: { appenders: ['appendConsole', 'appendFile'], level: 'all' }
     }
 });
 const logger = log4js.getLogger();
