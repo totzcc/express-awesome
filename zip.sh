@@ -1,3 +1,3 @@
 rm ../express-awesome.zip
-zip -r ../express-awesome.zip .
+7z a ../express-awesome.zip .
 open ..
