@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken')
 const jwtSecret = 'express-awesome'
 const jwtExpiresIn = 3 * 24 * 3600
 
-class BizSession {
+class BizJwt {
     set(req, res, obj) {
         if (!obj['jid']) {
             obj['jid'] = uuid.v4()
@@ -20,7 +20,7 @@ class BizSession {
         }
         try {
             const obj = jwt.verify(authorization, jwtSecret, {expiresIn: jwtExpiresIn})
-            if ((obj.exp - (jwtExpiresIn / 2)) < (Date.now() / 1000)) {
+            if (Math.random() * 100 < 20) {
                 const newObj = {...obj}
                 delete newObj.exp
                 delete newObj.iat
@@ -39,4 +39,4 @@ class BizSession {
         }
     }
 }
-module.exports = new BizSession()
+module.exports = new BizJwt()
