@@ -45,7 +45,7 @@ app.use(require('./routes/anti-filter'));
                 extra: systemStatus(st)
             })
         }
-        app.use(contextPath + handlerKey, async (req, res) => {
+        const requestHandler = async (req, res) => {
             res.header('Access-Control-Allow-Origin', '*')
             const st = Date.now()
             try {
@@ -58,7 +58,13 @@ app.use(require('./routes/anti-filter'));
             } catch (e) {
                 sendError(res ,e, st)
             }
-        })
+        }
+        const paths = handlerKey.split(' ')
+        if (paths.length === 2) {
+            app[paths[0].toLowerCase()](contextPath + paths[1], requestHandler)
+        } else {
+            app.all(contextPath + handlerKey, requestHandler)
+        }
     }
 })
 module.exports = app;
