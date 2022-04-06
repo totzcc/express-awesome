@@ -16,52 +16,69 @@ app.use(require('./routes/anti-filter'));
     const contextPath = process.env.CONTEXT_PATH || ''
     for (const handlerKey in handler) {
         const handlerValue = handler[handlerKey]
-        const systemStatus = (st) => {
-            return {
-                time: Date.now() - st,
-                ts: Date.now(),
-                up: process.uptime().toFixed(2)
+        const systemStatus = (res ,st) => {
+            if (!res.finished) {
+                res.header('X-Up', process.uptime().toFixed(2))
+                res.header('X-Time', Date.now() - st)
+                res.header('X-Ts', Date.now())
             }
         }
-        const sendSuccess = (res, data, st) => {
-            if (data === undefined && !res.finished) {
-                res.send('')
-            } else {
-                res.send({
-                    code: 0,
-                    data,
-                    extra: systemStatus(st)
-                })
+        const sendSuccess = (res, data) => {
+            if (!res.finished) {
+                if (data === undefined) {
+                    res.send('')
+                } else {
+                    if (typeof(data) === 'string' && data.startsWith('<')) {
+                        res.send(data)
+                    } else {
+                        res.send({
+                            code: 0,
+                            data
+                        })
+                    }
+                }
             }
         }
-        const sendError = (res, e, st) => {
+        const sendError = (res, e) => {
             console.error(e)
             res.send({
                 code: 1,
                 error: {
                     ...e,
                     message: e.message
-                },
-                extra: systemStatus(st)
+                }
             })
         }
+        const corsHandler = (req, res) => {
+            res.header('Access-Control-Allow-Origin', req.header('Origin') || '*')
+            res.header('Access-Control-Allow-Headers', ['Content-Type', 'Content-Length'].join(','))
+            res.header('Access-Control-Allow-Methods', '*')
+            res.header('Access-Control-Allow-Credentials', 'true')
+        }
         const requestHandler = async (req, res) => {
-            res.header('Access-Control-Allow-Origin', '*')
+            corsHandler(req, res)
             const st = Date.now()
             try {
                 const value = handlerValue(req, res)
+                systemStatus(res, st)
                 if (value instanceof Promise) {
                     sendSuccess(res, await value, st)
                 } else {
                     sendSuccess(res, value, st)
                 }
             } catch (e) {
+                systemStatus(res, st)
                 sendError(res ,e, st)
             }
         }
         const paths = handlerKey.split(' ')
         if (paths.length === 2) {
-            app[paths[0].toLowerCase()](contextPath + paths[1], requestHandler)
+            const reqPath = contextPath + paths[1]
+            app[paths[0].toLowerCase()](reqPath, requestHandler)
+            app.options(reqPath, (req, res) => {
+                corsHandler(req, res)
+                res.send('')
+            })
         } else {
             app.all(contextPath + handlerKey, requestHandler)
         }
