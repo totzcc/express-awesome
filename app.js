@@ -72,16 +72,17 @@ app.use(require('./routes/anti-filter'));
             }
         }
         const paths = handlerKey.split(' ')
+        let reqPath = contextPath + handlerKey
         if (paths.length === 2) {
-            const reqPath = contextPath + paths[1]
+            reqPath = contextPath + paths[1]
             app[paths[0].toLowerCase()](reqPath, requestHandler)
-            app.options(reqPath, (req, res) => {
-                corsHandler(req, res)
-                res.send('')
-            })
         } else {
-            app.all(contextPath + handlerKey, requestHandler)
+            app.all(reqPath, requestHandler)
         }
+        app.options(reqPath, (req, res) => {
+            corsHandler(req, res)
+            res.send('')
+        })
     }
 })
 module.exports = app;
