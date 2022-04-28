@@ -11,7 +11,7 @@ module.exports = {
             throw new Error('login has error')
         }
     },
-    'get /api/user/info': (req, res)=>{
+    'get /api/user/profile': (req, res)=>{
        return bizJwt.get(req, res)
     },
 

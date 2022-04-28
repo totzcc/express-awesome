@@ -10,17 +10,24 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(require('./routes/anti-filter'));
+app.use((req, res, next) => {
+    res.header('X-Up', process.uptime().toFixed(2) + '')
+    res.header('X-Ts', Date.now() + '')
+    res.header('Access-Control-Allow-Origin', req.header('Origin') || '*')
+    res.header('Access-Control-Allow-Headers', ['Content-Type'].join(','))
+    res.header('Access-Control-Allow-Methods', '*')
+    res.header('Access-Control-Allow-Credentials', 'true')
+    next()
+});
 [
-    require('./routes/router-user'),
+    require('./routes/router-user')
 ].forEach(handler => {
     const contextPath = process.env.CONTEXT_PATH || ''
     for (const handlerKey in handler) {
         const handlerValue = handler[handlerKey]
         const systemStatus = (res ,st) => {
             if (!res.finished) {
-                res.header('X-Up', process.uptime().toFixed(2))
                 res.header('X-Time', Date.now() - st)
-                res.header('X-Ts', Date.now())
             }
         }
         const sendSuccess = (res, data) => {
@@ -49,14 +56,7 @@ app.use(require('./routes/anti-filter'));
                 }
             })
         }
-        const corsHandler = (req, res) => {
-            res.header('Access-Control-Allow-Origin', req.header('Origin') || '*')
-            res.header('Access-Control-Allow-Headers', ['Content-Type', 'Content-Length'].join(','))
-            res.header('Access-Control-Allow-Methods', '*')
-            res.header('Access-Control-Allow-Credentials', 'true')
-        }
         const requestHandler = async (req, res) => {
-            corsHandler(req, res)
             const st = Date.now()
             try {
                 const value = handlerValue(req, res)
@@ -79,17 +79,17 @@ app.use(require('./routes/anti-filter'));
         } else {
             app.all(reqPath, requestHandler)
         }
-        app.options(reqPath, (req, res) => {
-            corsHandler(req, res)
-            res.send('')
-        })
     }
 })
 app.use((req, res) => {
     res.header('X-Up', process.uptime().toFixed(2))
-    res.send({
-        code: 1,
-        error: {message: '404 not found'}
-    })
+    if (req.method === 'OPTIONS') {
+        res.send('')
+    } else {
+        res.send({
+            code: 1,
+            error: {message: 'api path not found'}
+        })
+    }
 })
 module.exports = app;
