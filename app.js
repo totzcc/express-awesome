@@ -85,4 +85,11 @@ app.use(require('./routes/anti-filter'));
         })
     }
 })
+app.use((req, res) => {
+    res.header('X-Up', process.uptime().toFixed(2))
+    res.send({
+        code: 1,
+        error: {message: '404 not found'}
+    })
+})
 module.exports = app;
