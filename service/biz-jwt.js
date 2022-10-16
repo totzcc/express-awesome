@@ -8,35 +8,33 @@ class BizJwt {
         if (!obj['jid']) {
             obj['jid'] = uuid.v4()
         }
+        delete obj.exp
+        delete obj.iat
         const authorization = jwt.sign(obj, jwtSecret, {expiresIn: jwtExpiresIn})
         res.cookie('jwt', authorization, { maxAge: jwtExpiresIn * 1000, httpOnly: true })
+        res.header('x-jwt', authorization)
         return obj['jid']
     }
 
     get(req, res) {
-        const authorization = req.cookies['jwt']
+        const authorization = req.header('x-jwt') || req.cookies['jwt']
         if (!authorization) {
-            throw new Error('未登录')
+            throw new Error('wtf 未登录')
         }
         try {
             const obj = jwt.verify(authorization, jwtSecret, {expiresIn: jwtExpiresIn})
             if (Math.random() * 100 < 20) {
-                const newObj = {...obj}
-                delete newObj.exp
-                delete newObj.iat
-                this.set(req, res, newObj)
+                this.set(req, res, obj)
             }
             return obj
         } catch (e) {
-            throw new Error('未登录')
+            throw new Error('wtf 未登录')
         }
     }
 
     invoke(req, res) {
-        const authorization = req.cookies['jwt']
-        if (authorization) {
-            res.cookie('jwt', '', {maxAge: 0, httpOnly: true})
-        }
+        res.header('x-jwt', '')
+        res.cookie('jwt', '', {maxAge: 0, httpOnly: true})
     }
 }
 module.exports = new BizJwt()

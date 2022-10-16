@@ -9,7 +9,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(require('./routes/anti-filter'));
 app.use((req, res, next) => {
     res.header('X-Up', process.uptime().toFixed(2) + '')
     res.header('X-Ts', Date.now() + '')
