@@ -11,7 +11,14 @@ class BizJwt {
         delete obj.exp
         delete obj.iat
         const authorization = jwt.sign(obj, jwtSecret, {expiresIn: jwtExpiresIn})
-        res.cookie('jwt', authorization, { maxAge: jwtExpiresIn * 1000, httpOnly: true })
+        let sameSite = 'lax'
+        if (req.header('user-agent').toLowerCase().indexOf('electron') !== -1) {
+            sameSite = 'none'
+        }
+        res.cookie('jwt', authorization, {
+            maxAge: jwtExpiresIn * 1000, httpOnly: true,
+            sameSite, secure: true
+        })
         res.header('x-jwt', authorization)
         return obj['jid']
     }
