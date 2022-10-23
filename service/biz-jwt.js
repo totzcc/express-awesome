@@ -29,7 +29,14 @@ class BizJwt {
             throw new Error('wtf 未登录')
         }
         try {
-            const obj = jwt.verify(authorization, jwtSecret, {expiresIn: jwtExpiresIn})
+            let sameSite = 'lax'
+            if (req.header('user-agent').toLowerCase().indexOf('electron') !== -1) {
+                sameSite = 'none'
+            }
+            res.cookie('jwt', authorization, {
+                maxAge: jwtExpiresIn * 1000, httpOnly: true,
+                sameSite, secure: true
+            })
             if (Math.random() * 100 < 20) {
                 this.set(req, res, obj)
             }
@@ -41,7 +48,7 @@ class BizJwt {
 
     invoke(req, res) {
         res.header('x-jwt', '')
-        res.cookie('jwt', '', {maxAge: 0, httpOnly: true})
+        res.cookie('jwt', '', {maxAge: 0, httpOnly: true, sameSite: 'none', secure: true})
     }
 }
 module.exports = new BizJwt()

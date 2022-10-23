@@ -46,7 +46,7 @@ app.use((req, res, next) => {
             }
         }
         const sendError = (res, e) => {
-            if (e.message.indexOf('未登录') !== -1 && e.message.indexOf('wtf') !== -1) {
+            if (e.message.indexOf('wtf') !== -1) {
                 console.error(e)
             }
             res.send({
