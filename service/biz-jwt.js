@@ -29,6 +29,7 @@ class BizJwt {
             throw new Error('wtf 未登录')
         }
         try {
+            const obj = jwt.verify(authorization, jwtSecret, {expiresIn: jwtExpiresIn})
             let sameSite = 'lax'
             if (req.header('user-agent').toLowerCase().indexOf('electron') !== -1) {
                 sameSite = 'none'

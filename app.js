@@ -8,7 +8,14 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'), {
+    maxAge: 7 * 24 * 3600000,
+    setHeaders: (res, path1) => {
+        if (path1.indexOf('.html') !== -1) {
+            res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
+        }
+    }
+}));
 app.use((req, res, next) => {
     res.header('X-Up', process.uptime().toFixed(2) + '')
     res.header('X-Ts', Date.now() + '')
