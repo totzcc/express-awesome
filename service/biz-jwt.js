@@ -1,7 +1,7 @@
 const uuid = require('uuid')
 const jwt = require('jsonwebtoken')
-const jwtSecret = 'express-awesome'
-const jwtExpiresIn = 3 * 24 * 3600
+const jwtSecret = 'express'
+const jwtExpiresIn = 7 * 24 * 3600
 
 class BizJwt {
     set(req, res, obj) {
@@ -11,45 +11,29 @@ class BizJwt {
         delete obj.exp
         delete obj.iat
         const authorization = jwt.sign(obj, jwtSecret, {expiresIn: jwtExpiresIn})
-        let sameSite = 'lax'
-        if (req.header('user-agent').toLowerCase().indexOf('electron') !== -1) {
-            sameSite = 'none'
-        }
-        res.cookie('jwt', authorization, {
-            maxAge: jwtExpiresIn * 1000, httpOnly: true,
-            sameSite, secure: true
-        })
-        res.header('x-jwt', authorization)
+        res.header('Authorization', `Bearer ${authorization}`)
         return obj['jid']
     }
 
     get(req, res) {
-        const authorization = req.header('x-jwt') || req.cookies['jwt']
+        let authorization = req.header('Authorization') || ''
+        authorization = authorization.replace('Bearer ', '')
         if (!authorization) {
-            throw new Error('wtf 未登录')
+            throw new Error('wtf wtf need login')
         }
         try {
-            const obj = jwt.verify(authorization, jwtSecret, {expiresIn: jwtExpiresIn})
-            let sameSite = 'lax'
-            if (req.header('user-agent').toLowerCase().indexOf('electron') !== -1) {
-                sameSite = 'none'
-            }
-            res.cookie('jwt', authorization, {
-                maxAge: jwtExpiresIn * 1000, httpOnly: true,
-                sameSite, secure: true
-            })
+            const obj = jwt.verify(authorization, jwtSecret, { expiresIn: jwtExpiresIn })
             if (Math.random() * 100 < 20) {
                 this.set(req, res, obj)
             }
             return obj
         } catch (e) {
-            throw new Error('wtf 未登录')
+            throw new Error('wtf wtf need login')
         }
     }
 
     invoke(req, res) {
-        res.header('x-jwt', '')
-        res.cookie('jwt', '', {maxAge: 0, httpOnly: true, sameSite: 'none', secure: true})
+        res.header('Authorization', '')
     }
 }
 module.exports = new BizJwt()

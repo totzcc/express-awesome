@@ -25,10 +25,6 @@ app.use((req, res, next) => {
     res.header('Access-Control-Allow-Credentials', 'true')
     next()
 });
-app.use([
-    require('./routes/filter-aes'),
-    require('./routes/filter-time'),
-]);
 [
     require('./routes/router-user')
 ].forEach(handler => {
@@ -57,7 +53,7 @@ app.use([
             }
         }
         const sendError = (res, e) => {
-            if (e.message.indexOf('wtf') !== -1) {
+            if (e.message.indexOf('wtf') === -1) {
                 console.error(e)
             }
             res.send({
