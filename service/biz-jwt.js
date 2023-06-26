@@ -19,7 +19,7 @@ class BizJwt {
         let authorization = req.header('Authorization') || ''
         authorization = authorization.replace('Bearer ', '')
         if (!authorization) {
-            throw new Error('wtf wtf need login')
+            throw new Error('wtf 未登录')
         }
         try {
             const obj = jwt.verify(authorization, jwtSecret, { expiresIn: jwtExpiresIn })
@@ -28,7 +28,7 @@ class BizJwt {
             }
             return obj
         } catch (e) {
-            throw new Error('wtf wtf need login')
+            throw new Error('wtf 未登录')
         }
     }
 

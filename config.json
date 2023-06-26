@@ -1,0 +1,14 @@
+{
+  "redis": {
+    "prefix": "xxx",
+    "url": "redis://r-xxx.redis.zhangbei.rds.aliyuncs.com:6379/0",
+    "password": "xxx:xxx"
+  },
+  "mysql": {
+    "host": "rm-xxx.mysql.rds.aliyuncs.com",
+    "user": "xxx",
+    "password": "xxx",
+    "port": 3306,
+    "database": "xxx"
+  }
+}
